@@ -2,7 +2,8 @@
 import { ApiResponse, Book, Loan, LoginCredentials, RegisterData, User } from '@/types';
 import { toast } from 'sonner';
 
-const API_URL = 'http://localhost:8080/api';
+// Use relative URL for API requests
+const API_URL = '/api';
 
 // Helper to handle fetch requests
 const handleFetch = async <T>(
