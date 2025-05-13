@@ -1,15 +1,20 @@
 
 FROM node:18 as frontend-builder
 WORKDIR /app/frontend
-COPY . .
+COPY frontend/package*.json ./
 RUN npm install
+COPY frontend/ ./
 RUN npm run build
 
 FROM eclipse-temurin:17-jdk-jammy as backend-builder
 WORKDIR /app/backend
-# Copy Maven files to download dependencies
-COPY backend/pom.xml .
+# Copy Maven wrapper and POM
+COPY backend/mvnw backend/.mvn ./
+COPY backend/pom.xml ./
+# Copy source code
 COPY backend/src ./src
+# Make the Maven wrapper executable
+RUN chmod +x mvnw
 # Build the backend application
 RUN ./mvnw clean package -DskipTests
 
