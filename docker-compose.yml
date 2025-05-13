@@ -1,0 +1,52 @@
+
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      target: frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - library-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      target: backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/library?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=libraryuser
+      - SPRING_DATASOURCE_PASSWORD=librarypass
+    networks:
+      - library-network
+
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpass
+      - MYSQL_DATABASE=library
+      - MYSQL_USER=libraryuser
+      - MYSQL_PASSWORD=librarypass
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - library-network
+
+networks:
+  library-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
