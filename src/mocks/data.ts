@@ -61,7 +61,7 @@ export const mockBooks: Book[] = [
     isbn: '9780141439518',
     published: '1813-01-28',
     genre: 'Romance',
-    description: 'Few have failed to be charmed by the witty and independent spirit of Elizabeth Bennet in Austen's beloved classic.',
+    description: 'Few have failed to be charmed by the witty and independent spirit of Elizabeth Bennet in Austen\'s beloved classic.',
     coverImage: 'https://images-na.ssl-images-amazon.com/images/I/71Q0kJZgntL.jpg',
     available: 4,
   },
