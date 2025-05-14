@@ -60,7 +60,8 @@ const RegisterForm = () => {
         // Auto login after successful registration
         const loginResponse = await authService.login({ username, password });
         if (loginResponse.success && loginResponse.data) {
-          login(loginResponse.data.token, loginResponse.data.user);
+          // Pass the user object directly to login
+          login(loginResponse.data);
           navigate("/dashboard");
         } else {
           navigate("/login");
@@ -76,7 +77,8 @@ const RegisterForm = () => {
   // For demo purposes - mock registration
   const handleDemoRegister = () => {
     // This would be removed in production with real backend
-    login("mock-token-123", {
+    // Create a mock user object matching our User type
+    login({
       id: 1,
       username: "new_user",
       email: "new@example.com",
