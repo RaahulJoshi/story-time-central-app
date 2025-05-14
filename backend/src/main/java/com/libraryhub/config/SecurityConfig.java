@@ -86,8 +86,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/users/**")
                     .hasAuthority("ADMIN")
                 .anyRequest()
-                    .authenticated()
-                .and()
-            .httpBasic();
+                    .authenticated();
+        // Removed .httpBasic() to disable HTTP Basic Auth
     }
 }
