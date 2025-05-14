@@ -23,6 +23,23 @@ const handleFetch = async <T>(
       headers,
     });
 
+    // Handle 401 Unauthorized errors specifically
+    if (response.status === 401) {
+      // Clear invalid token
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      toast.error("Session expired. Please log in again.");
+      
+      // Redirect to login page
+      window.location.href = '/login';
+      
+      return {
+        success: false,
+        message: "Authentication failed",
+        data: {} as T,
+      };
+    }
+
     const data = await response.json();
 
     if (!response.ok) {
