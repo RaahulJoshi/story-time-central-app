@@ -30,7 +30,7 @@ const LoginForm = () => {
       const response = await authService.login({ username, password });
       
       if (response.success && response.data) {
-        login(response.data.token, response.data.user);
+        login(response.data);
         toast.success("Successfully logged in");
         navigate("/dashboard");
       }
@@ -44,7 +44,7 @@ const LoginForm = () => {
   // For demo purposes - mock login
   const handleDemoLogin = () => {
     // This would be removed in production with real backend
-    login("mock-token-123", {
+    login({
       id: 1,
       username: "demo_user",
       email: "demo@example.com",

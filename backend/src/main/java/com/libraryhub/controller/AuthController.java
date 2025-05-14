@@ -2,7 +2,6 @@
 package com.libraryhub.controller;
 
 import com.libraryhub.dto.AuthRequest;
-import com.libraryhub.dto.AuthResponse;
 import com.libraryhub.dto.RegisterRequest;
 import com.libraryhub.dto.UserDto;
 import com.libraryhub.service.AuthService;
@@ -23,7 +22,7 @@ public class AuthController {
     }
     
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest loginRequest) {
+    public ResponseEntity<UserDto> login(@Valid @RequestBody AuthRequest loginRequest) {
         return ResponseEntity.ok(authService.login(loginRequest));
     }
     

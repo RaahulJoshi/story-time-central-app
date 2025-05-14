@@ -6,10 +6,9 @@ import { toast } from 'sonner';
 
 interface AuthContextType {
   user: User | null;
-  token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (token: string, user: User) => void;
+  login: (user: User) => void;
   logout: () => void;
 }
 
@@ -17,64 +16,40 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Check for token validity on mount
+  // Check for session validity on mount
   useEffect(() => {
-    const validateToken = async () => {
+    const validateSession = async () => {
       setIsLoading(true);
       
-      // Check if user is already logged in
-      const storedToken = localStorage.getItem('token');
-      
-      if (storedToken) {
-        try {
-          // Validate the token by fetching user data
-          const response = await userService.getCurrentUser();
-          
-          if (response.success && response.data) {
-            setToken(storedToken);
-            setUser(response.data);
-          } else {
-            // If validation fails, clear token and user
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            setToken(null);
-            setUser(null);
-          }
-        } catch (error) {
-          // If API call fails, clear token and user
-          console.error("Token validation failed:", error);
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          setToken(null);
+      try {
+        // Validate by fetching user data
+        const response = await userService.getCurrentUser();
+        
+        if (response.success && response.data) {
+          setUser(response.data);
+        } else {
           setUser(null);
         }
-      } else {
-        // If no token in localStorage, ensure user is logged out
-        setToken(null);
+      } catch (error) {
+        console.error("Session validation failed:", error);
         setUser(null);
       }
       
       setIsLoading(false);
     };
     
-    validateToken();
+    validateSession();
   }, []);
 
-  const login = (token: string, user: User) => {
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(user));
-    setToken(token);
+  const login = (user: User) => {
     setUser(user);
     toast.success("Successfully logged in");
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setToken(null);
+    // In a real app, you would call a logout endpoint here
     setUser(null);
     toast.info("Logged out successfully");
   };
@@ -83,8 +58,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     <AuthContext.Provider
       value={{
         user,
-        token,
-        isAuthenticated: !!token,
+        isAuthenticated: !!user,
         isLoading,
         login,
         logout,

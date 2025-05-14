@@ -11,24 +11,20 @@ const handleFetch = async <T>(
   options: RequestInit = {},
 ): Promise<ApiResponse<T>> => {
   try {
-    const token = localStorage.getItem('token');
     const headers = {
       'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     };
 
     const response = await fetch(`${API_URL}${url}`, {
       ...options,
       headers,
+      credentials: 'include', // Include credentials for session cookies
     });
 
     // Handle 401 Unauthorized errors specifically
     if (response.status === 401) {
-      // Clear invalid token
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      toast.error("Session expired. Please log in again.");
+      toast.error("Authentication required. Please log in.");
       
       // Redirect to login page
       window.location.href = '/login';
@@ -61,7 +57,7 @@ const handleFetch = async <T>(
 // Auth Services
 export const authService = {
   login: async (credentials: LoginCredentials) => {
-    return handleFetch<{ token: string; user: User }>('/auth/login', {
+    return handleFetch<User>('/auth/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
     });
