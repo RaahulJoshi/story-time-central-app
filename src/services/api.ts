@@ -13,6 +13,7 @@ const handleFetch = async <T>(
   try {
     const headers = {
       'Content-Type': 'application/json',
+      'Accept': 'application/json', // Explicitly ask for JSON responses
       ...options.headers,
     };
 
@@ -21,6 +22,15 @@ const handleFetch = async <T>(
       headers,
       credentials: 'include', // Include credentials for session cookies
     });
+
+    // For non-JSON responses, handle appropriately
+    const contentType = response.headers.get('content-type');
+    if (contentType && !contentType.includes('application/json')) {
+      console.error('Received non-JSON response:', await response.text());
+      throw new Error('Server returned non-JSON response');
+    }
+
+    const data = await response.json();
 
     // Handle 401 Unauthorized errors specifically
     if (response.status === 401) {
@@ -36,16 +46,19 @@ const handleFetch = async <T>(
       };
     }
 
-    const data = await response.json();
-
     if (!response.ok) {
       throw new Error(data.message || 'An error occurred');
     }
 
-    return data;
+    return {
+      success: true,
+      message: data.message || 'Operation successful',
+      data: data as T
+    };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'An error occurred';
     toast.error(message);
+    console.error('API Error:', error);
     return {
       success: false,
       message,
