@@ -26,11 +26,34 @@ const handleFetch = async <T>(
     // For non-JSON responses, handle appropriately
     const contentType = response.headers.get('content-type');
     if (contentType && !contentType.includes('application/json')) {
-      console.error('Received non-JSON response:', await response.text());
-      throw new Error('Server returned non-JSON response');
+      // Instead of throwing an error right away, try to get the response body for debugging
+      const responseBody = await response.text();
+      console.error('Received non-JSON response:', responseBody);
+      
+      // Check if this is an HTML response which often means the API server is not running
+      if (responseBody.includes('<!DOCTYPE html>')) {
+        toast.error("Cannot connect to API server. Please check if the backend is running.");
+        console.error("Backend server might not be running. Response received:", responseBody.substring(0, 100) + '...');
+      }
+      
+      return {
+        success: false,
+        message: "Server returned non-JSON response. Backend might be unavailable.",
+        data: {} as T,
+      };
     }
 
-    const data = await response.json();
+    let data;
+    try {
+      data = await response.json();
+    } catch (jsonError) {
+      console.error('Failed to parse response as JSON:', jsonError);
+      return {
+        success: false,
+        message: "Failed to parse server response",
+        data: {} as T,
+      };
+    }
 
     // Handle 401 Unauthorized errors specifically
     if (response.status === 401) {
