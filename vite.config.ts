@@ -15,7 +15,7 @@ export default defineConfig({
     port: 8080,
     proxy: {
       '/api': {
-        target: 'http://localhost:8081', // Ensure backend runs on a different port
+        target: 'http://localhost:8081',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
         configure: (proxy, _options) => {
@@ -30,6 +30,9 @@ export default defineConfig({
           });
         },
       }
-    }
+    },
+    hmr: {
+      overlay: true,
+    },
   }
 })

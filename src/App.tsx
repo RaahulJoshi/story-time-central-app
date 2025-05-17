@@ -13,9 +13,18 @@ import RegisterPage from "./pages/RegisterPage";
 import BooksPage from "./pages/BooksPage";
 import BookDetailsPage from "./pages/BookDetailsPage";
 import DashboardPage from "./pages/DashboardPage";
+import ProfilePage from "./pages/ProfilePage";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 5, // 5 minutes
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -31,6 +40,7 @@ const App = () => (
             <Route path="/books" element={<BooksPage />} />
             <Route path="/books/:id" element={<BookDetailsPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

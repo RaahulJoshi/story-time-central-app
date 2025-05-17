@@ -1,4 +1,3 @@
-
 import { ApiResponse, Book, Loan, LoginCredentials, RegisterData, User } from '@/types';
 import { toast } from 'sonner';
 
@@ -13,32 +12,35 @@ const handleFetch = async <T>(
   try {
     const headers = {
       'Content-Type': 'application/json',
-      'Accept': 'application/json', // Explicitly ask for JSON responses
+      'Accept': 'application/json',
       ...options.headers,
     };
 
     const response = await fetch(`${API_URL}${url}`, {
       ...options,
       headers,
-      credentials: 'include', // Include credentials for session cookies
+      credentials: 'include',
     });
 
     // For non-JSON responses, handle appropriately
     const contentType = response.headers.get('content-type');
-    if (contentType && !contentType.includes('application/json')) {
-      // Instead of throwing an error right away, try to get the response body for debugging
-      const responseBody = await response.text();
-      console.error('Received non-JSON response:', responseBody);
-      
-      // Check if this is an HTML response which often means the API server is not running
-      if (responseBody.includes('<!DOCTYPE html>')) {
-        toast.error("Cannot connect to API server. Please check if the backend is running.");
-        console.error("Backend server might not be running. Response received:", responseBody.substring(0, 100) + '...');
+    if (!contentType || !contentType.includes('application/json')) {
+      // Try to get the response body for debugging
+      let responseBody;
+      try {
+        responseBody = await response.text();
+        console.error('Received non-JSON response:', responseBody.substring(0, 200));
+      } catch (textError) {
+        console.error('Failed to get response text:', textError);
       }
+      
+      // Show user-friendly error
+      toast.error("Cannot connect to API server. Please ensure the backend is running.");
+      console.error("Backend server might not be running or returned non-JSON response");
       
       return {
         success: false,
-        message: "Server returned non-JSON response. Backend might be unavailable.",
+        message: "Server connection issue. Please check if the backend is running.",
         data: {} as T,
       };
     }
@@ -59,8 +61,10 @@ const handleFetch = async <T>(
     if (response.status === 401) {
       toast.error("Authentication required. Please log in.");
       
-      // Redirect to login page
-      window.location.href = '/login';
+      // Redirect to login page only if not already there
+      if (!window.location.pathname.includes('/login')) {
+        window.location.href = '/login';
+      }
       
       return {
         success: false,
@@ -70,7 +74,9 @@ const handleFetch = async <T>(
     }
 
     if (!response.ok) {
-      throw new Error(data.message || 'An error occurred');
+      const errorMsg = data.message || `Error: ${response.status} ${response.statusText}`;
+      toast.error(errorMsg);
+      throw new Error(errorMsg);
     }
 
     return {
@@ -104,6 +110,14 @@ export const authService = {
       body: JSON.stringify(data),
     });
   },
+  logout: async () => {
+    // For frontend-only logout when backend is not available
+    return {
+      success: true,
+      message: 'Logged out successfully',
+      data: {} as User
+    };
+  }
 };
 
 // Book Services

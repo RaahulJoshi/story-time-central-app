@@ -1,7 +1,7 @@
 
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { User } from '@/types';
-import { userService } from '@/services/api';
+import { userService, authService } from '@/services/api';
 import { toast } from 'sonner';
 
 interface AuthContextType {
@@ -48,10 +48,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     toast.success("Successfully logged in");
   };
 
-  const logout = () => {
-    // In a real app, you would call a logout endpoint here
-    setUser(null);
-    toast.info("Logged out successfully");
+  const logout = async () => {
+    try {
+      // Try to call logout API if backend is available
+      await authService.logout();
+    } catch (error) {
+      console.error("Logout API call failed:", error);
+    } finally {
+      // Always clear local user state
+      setUser(null);
+      toast.info("Logged out successfully");
+    }
   };
 
   return (
